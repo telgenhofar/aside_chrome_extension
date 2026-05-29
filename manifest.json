@@ -7,9 +7,18 @@
         "storage",
         "tabs"
     ],
+    "web_accessible_resources": [
+        {
+            "resources": ["icons/*.svg"],
+            "matches": [
+                "https://claude.ai/*",
+                "https://chatgpt.com/*"
+            ]
+        }
+    ],
     "action": {
         "default_popup": "popup/popup.html",
-        "default_icon": "images/aside.png"
+        "default_icon": "icons/aside.png"
     },
     "content_scripts": [
         {

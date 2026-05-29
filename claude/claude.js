@@ -46,9 +46,13 @@ function showAsideTooltip(rect) {
     if (existingTooltip.querySelector('.aside-btn')) return;
 
     const button = document.createElement('button');
-
     button.className = 'aside-btn';
-    button.textContent = 'Aside';
+
+    fetch(chrome.runtime.getURL('icons/aside.svg'))
+        .then(r => r.text())
+        .then(svgContent => {
+            button.innerHTML = `Aside ${svgContent}`;
+        });
 
     existingTooltip.appendChild(button);
 }
