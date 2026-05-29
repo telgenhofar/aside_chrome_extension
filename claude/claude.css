@@ -1,0 +1,24 @@
+.aside-btn {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: none;
+  border: none;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  border-radius: 0 8px 8px 0;
+  transition: background 0.2s;
+  height: 100%;
+}
+
+.aside-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+[data-selection-tooltip] button:first-child {
+  border-radius: 8px 0 0 8px !important;
+}

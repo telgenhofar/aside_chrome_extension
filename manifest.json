@@ -1,0 +1,26 @@
+{
+    "name": "Aside",
+    "description": "Aside action for language model web interfaces",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [
+        "storage",
+        "tabs"
+    ],
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_icon": "images/aside.png"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://claude.ai/*"],
+            "js": ["claude/claude.js"],
+            "css": ["claude/claude.css"]
+        },
+        {
+            "matches": ["https://chatgpt.com/*"],
+            "js": ["chatgpt/chatgpt.js"],
+            "css": ["chatgpt/chatgpt.css"]
+        }
+    ]
+}
