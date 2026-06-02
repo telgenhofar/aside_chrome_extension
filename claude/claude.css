@@ -1,3 +1,21 @@
+/* Suppress Claude's native tooltip entirely — their button is still
+   in the DOM so it can be called via .click(), but it never renders */
+[data-selection-tooltip="true"] {
+  display: none !important;
+}
+
+.aside-tooltip {
+  position: fixed;
+  z-index: 2147483647;
+  background: #111110;
+  border-radius: 8px;
+  display: flex;
+  align-items: stretch;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  height: 36px;
+}
+
+.aside-reply-btn,
 .aside-btn {
   padding: 6px 12px;
   font-size: 0.875rem;
@@ -5,28 +23,39 @@
   color: white;
   background: none;
   border: none;
-  border-left: 1px solid rgba(255,255,255,0.1);
   cursor: pointer;
   white-space: nowrap;
   display: flex;
   align-items: center;
-  border-radius: 0 8px 8px 0;
   transition: background 0.2s;
-  height: 100%;
 }
 
+.aside-reply-btn {
+  border-radius: 8px 0 0 8px;
+}
+
+.aside-btn {
+  border-radius: 0 8px 8px 0;
+}
+
+.aside-reply-btn:hover,
+.aside-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.aside-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 6px 0;
+  flex-shrink: 0;
+}
+
+.aside-reply-btn svg,
 .aside-btn svg {
   width: 1em;
   height: 1em;
   vertical-align: middle;
   margin-left: 4px;
   stroke: white;
-}
-
-.aside-btn:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-[data-selection-tooltip] button:first-child {
-  border-radius: 8px 0 0 8px !important;
+  fill: none;
 }
