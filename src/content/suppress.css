@@ -1,0 +1,13 @@
+/* Suppress Claude's native selection tooltip. Its button stays in the DOM so we can
+   trigger it via .click(), but it must never render. Injected into the page itself
+   (not the shadow root) because it targets one of Claude's own elements. */
+[data-selection-tooltip='true'] {
+  display: none !important;
+}
+
+/* Hover highlight for an aside's source selection (CSS Custom Highlight API).
+   Must live in the page (not the shadow root): it styles a Range over Claude's
+   own message text, which a shadow-scoped rule cannot reach. */
+::highlight(aside-hover) {
+  background-color: rgba(251, 191, 36, 0.22);
+}

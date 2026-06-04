@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+aside-v*.zip
+
+# Logs & misc
+npm-debug.log*
+*.local
+.DS_Store

@@ -1,0 +1,960 @@
+/* ── Selection tooltip ───────────────────────────────────────────────────── */
+
+.aside-tooltip {
+  position: fixed;
+  z-index: 2147483647;
+  background: #111110;
+  border-radius: 8px;
+  display: flex;
+  align-items: stretch;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  height: 36px;
+  font-family: 'Anthropic Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.aside-reply-btn,
+.aside-btn {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.aside-reply-btn {
+  border-radius: 8px 0 0 8px;
+}
+.aside-btn {
+  border-radius: 0 8px 8px 0;
+}
+
+.aside-reply-btn:hover,
+.aside-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.aside-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 6px 0;
+  flex-shrink: 0;
+}
+
+.aside-reply-btn svg,
+.aside-btn svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  margin-left: 4px;
+  stroke: white;
+  fill: none;
+}
+
+/* ── Modal backdrop ──────────────────────────────────────────────────────── */
+
+.aside-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: aside-backdrop-in 0.15s ease;
+}
+
+@keyframes aside-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Modal container ─────────────────────────────────────────────────────── */
+
+.aside-modal {
+  background: rgb(31, 31, 30); /* Claude's exact page background */
+  border-radius: 16px;
+  width: min(780px, 92vw);
+  height: min(780px, 88vh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.65);
+  animation: aside-modal-in 0.15s ease;
+  font-family: 'Anthropic Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  color: rgb(248, 248, 246); /* Claude's exact text color */
+}
+
+@keyframes aside-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Modal header ────────────────────────────────────────────────────────── */
+
+.aside-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.aside-modal-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgb(195, 194, 183); /* Claude's exact muted label color */
+}
+
+.aside-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgb(195, 194, 183);
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.aside-modal-close:hover {
+  color: rgb(248, 248, 246);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.aside-modal-close svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ── Message list ────────────────────────────────────────────────────────── */
+
+.aside-modal-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  scroll-behavior: smooth;
+}
+
+.aside-modal-messages::-webkit-scrollbar {
+  width: 6px;
+}
+.aside-modal-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+.aside-modal-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+.aside-modal-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.aside-message-user {
+  background: hsl(var(--aside-bg-300));
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: hsl(var(--aside-text-100));
+  max-width: 85%;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+.aside-message-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+/* Assistant — plain flowing text, no background */
+.aside-message-assistant {
+  background: transparent;
+  font-size: 16px;
+  line-height: 1.4;
+  color: hsl(var(--aside-text-100));
+  max-width: 100%;
+}
+
+.aside-message-assistant .aside-message-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Input area ──────────────────────────────────────────────────────────── */
+/* The --aside-* tokens alias Claude's live CSS vars; they resolve because this
+   stylesheet's custom properties inherit through the shadow boundary. */
+
+.aside-modal-input-area {
+  flex-shrink: 0;
+  margin: 0 8px 8px;
+  background: hsl(var(--aside-bg-000));
+  border-radius: 20px;
+  border: 1px solid transparent;
+  position: relative;
+  transition: box-shadow 0.2s;
+  box-shadow:
+    0 0.25rem 1.25rem hsl(var(--aside-always-black) / 3.5%),
+    0 0 0 0.5px hsl(var(--aside-border-300) / 15%);
+}
+
+.aside-modal-input-area:hover {
+  box-shadow:
+    0 0.25rem 1.25rem hsl(var(--aside-always-black) / 3.5%),
+    0 0 0 0.5px hsl(var(--aside-border-200) / 30%);
+}
+
+.aside-modal-input-area:focus-within {
+  box-shadow:
+    0 0.25rem 1.25rem hsl(var(--aside-always-black) / 7.5%),
+    0 0 0 0.5px hsl(var(--aside-border-200) / 30%);
+}
+
+/* ── Attachment chips section ────────────────────────────────────────────── */
+
+.aside-input-overflow {
+  overflow: hidden;
+}
+
+.aside-input-pad {
+  padding: 14px 14px 10px;
+}
+
+.aside-input-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aside-input-chips {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  overflow-x: auto;
+  padding-left: 8px;
+  margin-left: -8px;
+  padding-top: 8px;
+  margin-top: -8px;
+}
+
+/* ── Individual chip (120×120) ───────────────────────────────────────────── */
+
+.aside-chip-inner {
+  position: relative;
+}
+
+.aside-chip-inner:hover .aside-chip-remove,
+.aside-chip-inner:focus-within .aside-chip-remove {
+  opacity: 1;
+}
+
+.aside-chip-card {
+  box-sizing: border-box;
+  width: 120px;
+  height: 120px;
+  min-width: 120px;
+  background: hsl(var(--aside-bg-000));
+  border-radius: 8px;
+  border: 0.5px solid hsl(var(--aside-border-300) / 25%);
+  padding: 8px 10px;
+  box-shadow: 0 1px 2px hsl(var(--aside-always-black) / 5%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  overflow: hidden;
+  cursor: default;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.aside-chip-card:hover {
+  border-color: hsl(var(--aside-border-200) / 50%);
+  box-shadow: 0 1px 2px hsl(var(--aside-always-black) / 10%);
+}
+
+/* ── Text-excerpt chip top section ──────────────────────────────────────── */
+
+.aside-chip-text-top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+.aside-chip-text-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+/* 8px text with a 6-line clamp — matches Claude's pasted-text chips */
+.aside-chip-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 8px;
+  line-height: 1.4;
+  color: hsl(var(--aside-text-500) / 80%);
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
+  margin: 0;
+}
+
+/* ── Text-excerpt chip bottom badge ─────────────────────────────────────── */
+
+.aside-chip-text-bottom {
+  flex-shrink: 0;
+}
+
+.aside-chip-badge-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.aside-chip-badge {
+  min-width: 0;
+  height: 18px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 4px;
+  border: 0.5px solid hsl(var(--aside-border-300) / 25%);
+  box-shadow: 0 1px 2px hsl(var(--aside-always-black) / 5%);
+  border-radius: 4px;
+  background: hsl(var(--aside-bg-000) / 70%);
+  backdrop-filter: blur(4px);
+  font-weight: 500;
+}
+
+.aside-chip-badge-text {
+  text-transform: uppercase;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: hsl(var(--aside-text-300));
+  font-size: 11px;
+  line-height: 13px;
+  margin: 0;
+}
+
+/* Remove × — hidden until the chip is hovered or focused */
+.aside-chip-remove {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 0.5px solid hsl(var(--aside-border-300) / 25%);
+  background: hsl(var(--aside-bg-000) / 90%);
+  backdrop-filter: blur(4px);
+  color: hsl(var(--aside-text-500));
+  opacity: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    background 0.15s;
+}
+
+.aside-chip-remove:hover {
+  color: hsl(var(--aside-text-200));
+  background: hsl(var(--aside-bg-000) / 50%);
+}
+
+/* CLOSE_SVG is stroke-based (Lucide X) */
+.aside-chip-remove svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* ── Main input section ──────────────────────────────────────────────────── */
+
+.aside-input-main {
+  display: flex;
+  flex-direction: column;
+  margin: 14px;
+  gap: 12px;
+}
+
+.aside-input-field-wrap {
+  position: relative;
+}
+
+/* ── Contenteditable input ──────────────────────────────────────────────── */
+
+.aside-modal-input-field {
+  width: 100%;
+  max-height: 384px;
+  min-height: 1.5rem;
+  overflow-y: auto;
+  font-size: 16px;
+  line-height: 22.4px;
+  color: hsl(var(--aside-text-100));
+  background: transparent;
+  outline: none;
+  caret-color: hsl(var(--aside-text-100));
+  word-break: break-word;
+  padding: 6px 0 0 6px;
+  font-family: 'Anthropic Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.aside-modal-input-field:empty::before {
+  content: attr(data-placeholder);
+  color: hsl(var(--aside-text-500));
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Toolbar — + left, send right ───────────────────────────────────────── */
+
+.aside-input-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.aside-input-toolbar-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.aside-input-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.aside-input-add {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--aside-text-100));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  margin-left: 2px;
+}
+
+.aside-input-add:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.aside-input-add svg {
+  width: 20px;
+  height: 20px;
+}
+
+.aside-modal-send {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(15.1 54.2% 51.2%);
+  color: white;
+  transition: filter 0.15s;
+}
+
+.aside-modal-send:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.aside-modal-send:not(:disabled):hover {
+  filter: brightness(1.1);
+}
+
+/* Phosphor ArrowUp is fill-based */
+.aside-modal-send svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  stroke: none;
+}
+
+/* ── + menu popup ────────────────────────────────────────────────────────── */
+
+.aside-add-menu {
+  position: fixed;
+  z-index: 2147483647;
+  background: #383835;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.122),
+    0 2px 6px rgba(0, 0, 0, 0.078);
+  padding: 4px;
+  min-width: 220px;
+  font-family: 'Anthropic Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.aside-add-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--aside-text-100));
+  font-size: 13px;
+  line-height: 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+
+.aside-add-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.aside-add-menu-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #898781;
+}
+
+.aside-add-menu-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.aside-add-menu-label {
+  flex: 1;
+}
+
+.aside-add-menu-shortcut {
+  font-size: 11px;
+  color: #898781;
+}
+
+/* ── File chip layout ────────────────────────────────────────────────────── */
+
+.aside-chip-card-file {
+  justify-content: space-between !important;
+}
+
+.aside-chip-file-top {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.aside-chip-filename {
+  font-size: 12px;
+  line-height: 1.4;
+  color: hsl(var(--aside-text-100));
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  margin: 0;
+}
+
+.aside-chip-subtitle {
+  font-size: 10px;
+  line-height: 1.3;
+  color: hsl(var(--aside-text-500));
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.aside-chip-file-bottom {
+  display: flex;
+  align-items: center;
+}
+
+.aside-chip-ext-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 4px;
+  border: 0.5px solid hsl(var(--aside-border-300) / 25%);
+  border-radius: 4px;
+  background: hsl(var(--aside-bg-000) / 70%);
+  backdrop-filter: blur(4px);
+  font-size: 11px;
+  line-height: 13px;
+  font-weight: 500;
+  color: hsl(var(--aside-text-300));
+  text-transform: uppercase;
+  font-family: 'Anthropic Sans', system-ui, sans-serif;
+}
+
+/* ── Message groups (chips above the bubble, not inside it) ──────────────── */
+
+.aside-message-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.aside-message-group-user {
+  align-items: flex-end;
+}
+
+.aside-message-group-assistant {
+  align-items: flex-start;
+}
+
+/* ── Message-level attachment chips (read-only, no × button) ────────────── */
+
+.aside-msg-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin: 0 2px 12px; /* space before the bubble */
+}
+
+/* Sent chips are clickable: text/file → viewer, image → lightbox */
+.aside-msg-attachments .aside-chip-card {
+  cursor: pointer;
+}
+
+.aside-chip-card-image {
+  padding: 0;
+  overflow: hidden;
+  justify-content: stretch;
+  gap: 0;
+}
+
+.aside-chip-img-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: hsl(var(--aside-bg-000));
+}
+
+.aside-chip-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Text viewer (right-side panel) ──────────────────────────────────────── */
+
+.aside-text-viewer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 42vw);
+  z-index: 2147483647;
+  background: hsl(var(--aside-bg-100));
+  border-left: 0.5px solid hsl(var(--aside-border-300) / 25%);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Anthropic Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  animation: aside-panel-in 0.18s ease;
+}
+
+@keyframes aside-panel-in {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.aside-tv-outer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px 0 4px 20px;
+}
+
+.aside-tv-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 20px;
+  flex-shrink: 0;
+}
+
+.aside-tv-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: hsl(var(--aside-text-100));
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.aside-tv-btn:hover {
+  background: hsl(var(--aside-bg-300) / 60%);
+}
+.aside-tv-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.aside-tv-btn-back {
+  margin-left: -8px;
+}
+.aside-tv-btn-close {
+  margin-right: -8px;
+}
+
+.aside-tv-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: hsl(var(--aside-text-100));
+  margin: 0;
+}
+
+.aside-tv-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding-right: 20px;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+}
+
+.aside-tv-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0;
+  color: hsl(var(--aside-text-500));
+  font-size: 0.75rem;
+  margin-top: 2px;
+  margin-bottom: 12px;
+}
+
+.aside-tv-dot {
+  opacity: 0.5;
+}
+.aside-tv-dot-sep {
+  margin: 0 6px;
+  opacity: 0.5;
+}
+
+.aside-tv-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  padding: 16px;
+  background: hsl(var(--aside-bg-000));
+  border-radius: 8px;
+  border: 0.5px solid hsl(var(--aside-border-300) / 25%);
+  font-family: 'Anthropic Mono', ui-monospace, 'Cascadia Code', monospace;
+  box-shadow: 0 1px 2px hsl(var(--aside-always-black) / 5%);
+  color: hsl(var(--aside-text-100));
+}
+
+/* ── Image preview (centered dialog) ─────────────────────────────────────── */
+
+.aside-image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: brightness(0.75);
+  animation: aside-backdrop-in 0.15s ease;
+}
+
+/* pointer-events:none so clicks off the image fall through to the backdrop */
+.aside-img-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px 40px;
+  pointer-events: none;
+}
+
+.aside-img-dialog {
+  max-width: 40rem;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* pointer-events:auto re-enables interaction over the image itself */
+.aside-img-inner {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+  pointer-events: auto;
+}
+
+.aside-img-close {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.aside-img-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.aside-img-close svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.aside-img-wrap {
+  width: fit-content;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 0.5px rgba(0, 0, 0, 0.25);
+}
+
+.aside-img-preview {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 4rem);
+  width: auto;
+  height: auto;
+}
+
+.aside-img-caption {
+  padding-top: 6px;
+  text-align: center;
+  color: white;
+  word-break: break-word;
+  pointer-events: none;
+  font-size: 0.875rem;
+  font-family: 'Anthropic Sans', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Margin icons ────────────────────────────────────────────────────────── */
+
+.aside-margin-icon {
+  position: fixed;
+  z-index: 0; /* below Claude's chrome (its input bar uses z-1/z-10) */
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(31, 31, 30, 0.85); /* matches Claude's page bg */
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.aside-margin-icon:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.aside-margin-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: rgb(195, 194, 183);
+  fill: none;
+}
+
+/* Hover highlight (CSS Custom Highlight API) lives in content/suppress.css, not here:
+   it styles a Range in the host page, which a shadow-root rule can't reach. */
